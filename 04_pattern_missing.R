@@ -72,42 +72,72 @@ uniq_rows = unique(tbl_miss$row)
 
 #### visualize missing patterns ####
 # real missing values
-gg_miss_fct(sub_usa, ds_m4)
+pdf("./imgs/real_missing_pattern.pdf", width = 10, height = 6)
 md.pattern(sub_usa, rotate.names = T)
+dev.off()
+
+gg_miss_fct(sub_usa, ds_m4) + 
+  ggsave("./imgs/real_missing_fct.pdf", device = "pdf", width = 10, height = 6, units = "cm", scale = 2)
+
+pdf("./imgs/real_missing_prop.pdf", width = 10, height= 6)
 aggr_plot <- aggr(sub_usa, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
                   labels=names(sub_usa), cex.axis=.7, gap=3, 
                   ylab=c("Histogram of missing data","Pattern"))
+dev.off()
+
 # sub_usa %>% 
 #   dplyr::select(c("all_day_ratio_single_tile_users",
 #                   "m50", "cases", "deaths", "apple_mobility")) %>%
 #   missing_pairs(position = "fill")
 
 # MCAR values
-gg_miss_fct(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4), ds_m4)
+pdf("./imgs/mcar_missing_pattern.pdf", width = 10, height = 6)
 md.pattern(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4), rotate.names = T)
+dev.off()
+
+gg_miss_fct(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4), ds_m4)+ 
+  ggsave("./imgs/mcar_missing_fct.pdf", device = "pdf", width = 10, height = 6, units = "cm", scale = 2)
+
+pdf("./imgs/mcar_missing_prop.pdf", width = 10, height= 6)
 aggr_plot <- aggr(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4), col=c('navyblue','red'), 
                   numbers=TRUE, sortVars=TRUE, 
                   labels=c(names(usa.mis), "ds_m4"), cex.axis=.7, gap=3, 
                   ylab=c("Histogram of missing data","Pattern"))
+dev.off()
+
 # missing_pairs(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4))
 
 # MNAR values
-gg_miss_fct(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4), ds_m4)
+pdf("./imgs/mnar_missing_pattern.pdf", width = 10, height = 6)
 md.pattern(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4), rotate.names = T)
+dev.off()
+
+gg_miss_fct(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4), ds_m4)+ 
+  ggsave("./imgs/mnar_missing_fct.pdf", device = "pdf", width = 10, height = 6, units = "cm", scale = 2)
+
+pdf("./imgs/mnar_missing_prop.pdf", width = 10, height= 6)
 aggr_plot <- aggr(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4), col=c('navyblue','red'), 
                   numbers=TRUE, sortVars=TRUE, 
                   labels=c(names(usa.mis.nonran), "ds_m4"), cex.axis=.7, gap=3, 
                   ylab=c("Histogram of missing data","Pattern"))
+dev.off()
+
 # missing_pairs(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4))
 
 #### Diagnostic tests for MCAR vs. MAR
 # Check for associations between missing and observed data
 
 little_result <- BaylorEdPsych::LittleMCAR(sub_usa[,1:7])
+little_result$chi.square
+little_result$df
 little_result$p.value
 little_result_random_mis <- BaylorEdPsych::LittleMCAR(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4))
+little_result_random_mis$chi.square
+little_result_random_mis$df
 little_result_random_mis$p.value
 little_result_nonrandom_mis <- BaylorEdPsych::LittleMCAR(bind_cols(usa.mis.nonran, ds_m4 = sub_usa$ds_m4))
+little_result_nonrandom_mis$chi.square
+little_result_nonrandom_mis$df
 little_result_nonrandom_mis$p.value
 
 # MissMech for missing data pattern tests
@@ -120,8 +150,8 @@ little_result_nonrandom_mis$p.value
 # having identical missing data patterns, i.e. identical covariances.
 
 MissMech::TestMCARNormality(sub_usa[, 3:7])
-MissMech::TestMCARNormality(usa.mis) # vector memory exhausted
-MissMech::TestMCARNormality(usa.mis.nonran) # doesn't run because there are no missing patterns 
+# MissMech::TestMCARNormality(usa.mis) # vector memory exhausted
+# MissMech::TestMCARNormality(usa.mis.nonran) # doesn't run because there are no missing patterns 
 # MissMech::TestMCARNormality(bind_cols(usa.mis, ds_m4 = sub_usa$ds_m4))
 
 ##### TRYING OUT MICE #####
